@@ -12,6 +12,7 @@ using EticaretAPI.Persistence.Repositories;
 using EticaretAPI.Persistence.Repositories.Invoice;
 using EticaretAPI.Persistence.Repositories.File;
 using EticaretAPI.Persistence.Repositories.ProductImage;
+using EticaretAPI.Domain.Entities.Identity;
 
 namespace EticaretAPI.Persistence
 {
@@ -20,6 +21,7 @@ namespace EticaretAPI.Persistence
         public static void AddPersistanceServices(this  IServiceCollection services) 
         {
             services.AddDbContext<EticaretAPIDbContext>(options => options.UseNpgsql(Configuration.ConnectionString));
+            services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<EticaretAPIDbContext>();
             services.AddScoped<IOrderReadRepository, OrderReadRepository>();
             services.AddScoped<IProductReadRepository, ProductReadRepository>();
             services.AddScoped<ICustomerReadRepository, CustomerReadRepository>();

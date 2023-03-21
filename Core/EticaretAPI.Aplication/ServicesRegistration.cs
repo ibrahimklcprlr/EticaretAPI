@@ -1,4 +1,4 @@
-﻿using EticaretAPI.Aplication.Features.Queries.GetAllProduct;
+﻿
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using EticaretAPI.Aplication.Abstraction.Token;
 
 namespace EticaretAPI.Aplication
 {
