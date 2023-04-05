@@ -13,6 +13,12 @@ using EticaretAPI.Persistence.Repositories.Invoice;
 using EticaretAPI.Persistence.Repositories.File;
 using EticaretAPI.Persistence.Repositories.ProductImage;
 using EticaretAPI.Domain.Entities.Identity;
+using EticaretAPI.Aplication.Abstraction.Services;
+using EticaretAPI.Persistence.Services;
+using EticaretAPI.Aplication.Repositories.Basket;
+using EticaretAPI.Persistence.Repositories.Basket;
+using EticaretAPI.Aplication.Repositories.BasketItem;
+using EticaretAPI.Persistence.Repositories.BasketItem;
 
 namespace EticaretAPI.Persistence
 {
@@ -34,6 +40,12 @@ namespace EticaretAPI.Persistence
             services.AddScoped<IFileWriteRepository, FileWriteRepository>();
             services.AddScoped<IProductImageFileReadRepository, ProductImageFileReadRepository>();
             services.AddScoped<IProductImageFileWriteRepository, ProductImageFileWriteRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IBasketReadRepository, BasketReadRepository>();
+            services.AddScoped<IBasketWriteRepository, BasketWriteRepository>();
+            services.AddScoped<IBasketItemReadRepository, BasketItemReadRepository>();
+            services.AddScoped<IBasketItemWriteRepository, BasketItemWriteRepository>();
 
         }
 

@@ -21,6 +21,8 @@ namespace EticaretAPI.Persistence.Contexts
         DbSet<Domain.Entities.File> Files { get; set; }
         DbSet<ProductImageFile> ProductImages { get; set; }
         DbSet<InvoiceFile> InvoiceFiles { get; set; }
+        DbSet<Basket> Baskets { get; set; }
+        DbSet<BasketItem> BasketItems { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

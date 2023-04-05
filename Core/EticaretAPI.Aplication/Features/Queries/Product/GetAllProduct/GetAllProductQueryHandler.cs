@@ -2,6 +2,7 @@
 using EticaretAPI.Aplication.RequestParametres;
 using EticaretAPI.Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,9 @@ namespace EticaretAPI.Aplication.Features.Queries.Product.GetAllProduct
         public async Task<GetAllProductQueryResponse> Handle(GetAllProductQueryRequest request, CancellationToken cancellationToken)
         {
             var totalCount = _productReadRepository.GetAll(false).Count();
-            var products = _productReadRepository.GetAll(false).Select(p => new
+            var products = _productReadRepository.GetAll(false).Skip(request.Page * request.Size).Take(request.Size)
+                .Include(p=>p.ProductImages).
+                Select(p => new
             {
                 p.Id,
                 p.CreatedDate,
@@ -30,7 +33,8 @@ namespace EticaretAPI.Aplication.Features.Queries.Product.GetAllProduct
                 p.Price,
                 p.Name,
                 p.Stock,
-            }).Skip(request.Page * request.Size).Take(request.Size);
+                p.ProductImages
+            }).ToList();
 
 
             return new()

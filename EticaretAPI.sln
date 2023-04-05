@@ -17,7 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EticaretAPI.API", "Presentation\EticaretAPI.API\EticaretAPI.API.csproj", "{A1BCC2C7-391B-411F-B86E-F2DD53CB29E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EticaretAPI.Domain", "Core\EticaretAPI.Domain\EticaretAPI.Domain.csproj", "{FBD41348-393C-48F4-91F0-53E0F2871BA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EticaretAPI.Domain", "Core\EticaretAPI.Domain\EticaretAPI.Domain.csproj", "{FBD41348-393C-48F4-91F0-53E0F2871BA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EticaretAPI.SignalR", "Infrastructure\EticaretAPI.SignalR\EticaretAPI.SignalR.csproj", "{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{FBD41348-393C-48F4-91F0-53E0F2871BA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBD41348-393C-48F4-91F0-53E0F2871BA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBD41348-393C-48F4-91F0-53E0F2871BA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{7D49BCC0-42DD-4A0D-9B00-D1628D763BDE} = {9502354A-E637-4AD8-8F2E-93851BC5D5EA}
 		{A1BCC2C7-391B-411F-B86E-F2DD53CB29E6} = {168E1DA1-34B9-4178-934C-B495F21E7E13}
 		{FBD41348-393C-48F4-91F0-53E0F2871BA2} = {1F65CF94-53C4-4369-A3B7-CE9386057395}
+		{659D2ADA-083E-47EE-BEF3-FAFDE0D6DD16} = {9502354A-E637-4AD8-8F2E-93851BC5D5EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E4A96960-265A-4D00-9413-A412429AD87C}

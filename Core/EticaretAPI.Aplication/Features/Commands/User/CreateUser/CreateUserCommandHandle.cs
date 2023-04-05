@@ -1,4 +1,6 @@
-﻿using EticaretAPI.Domain.Entities.Identity;
+﻿using EticaretAPI.Aplication.Abstraction.Services;
+using EticaretAPI.Aplication.DTOs.User;
+using EticaretAPI.Domain.Entities.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -11,37 +13,27 @@ namespace EticaretAPI.Aplication.Features.Commands.User.CreateUser
 {
     public class CreateUserCommandHandle : IRequestHandler<CreateUserCommandRequest, CreateUserCommandResponse>
     {
-         readonly  UserManager<AppUser> _userManager;
+        readonly IUserService _userService;
 
-        public CreateUserCommandHandle(UserManager<AppUser> userManager)
+        public CreateUserCommandHandle(IUserService userService)
         {
-            _userManager = userManager;
+            _userService = userService;
         }
 
         public async Task<CreateUserCommandResponse> Handle(CreateUserCommandRequest request, CancellationToken cancellationToken)
         {
-          IdentityResult result= await  _userManager.CreateAsync(new()
+           CreateUserResponse response=await  _userService.CreateAsync(new()
             {
-                Id=Guid.NewGuid().ToString(),
-                UserName=request.Username,
-                NameSurName=request.NameSurname,
-                Email=request.Email,
-               
-            },request.Password);
-            CreateUserCommandResponse response= new CreateUserCommandResponse(){ success= result.Succeeded};
-            if (result.Succeeded)
+                Username = request.Username,
+                Email = request.Email,
+                Password = request.Password,
+                PasswordConfirm = request.PasswordConfirm
+            });
+            return new()
             {
-                response.message = "Kullanıcı Başarılı Bir Şekilde Eklendi";
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    response.message += $"{error.Code} - {error.Description}";
-                }
-              
-            }
-            return response;
+                message=response.message,
+                success=response.success
+            };
         }
     }
 }

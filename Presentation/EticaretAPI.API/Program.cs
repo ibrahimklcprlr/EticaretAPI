@@ -1,4 +1,4 @@
-using EticaretAPI.Aplication.Validators.Products;
+ï»¿using EticaretAPI.Aplication.Validators.Products;
 using EticaretAPI.Persistence;
 using FluentValidation.AspNetCore;
 using EticaretAPI.Infrastructure.FluentValidation;
@@ -9,29 +9,26 @@ using EticaretAPI.Aplication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
+using Serilog.Core;
+using Serilog.Sinks.PostgreSQL;
+using System.Security.Claims;
+using Serilog.Context;
+using EticaretAPI.API.Configurations.ColumWriters;
+using Microsoft.AspNetCore.HttpLogging;
+using EticaretAPI.API.Extensions;
+using EticaretAPI.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
-
 //builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 //    policy.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
 //));
+
 builder.Services.AddPersistanceServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddAplicationServices();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer("Admin",options =>
-{
-    options.TokenValidationParameters = new()
-    {
-        ValidateAudience = true,//Oluþturulacak token deðerini kimlerin/hangi orjinlerin/hangi sitelerin kullanýcý belirttiðimiz deðer
-        ValidateIssuer = true,//Oluþturulacak Tokenin kimin Daðýttýðýný ifade edeceðimiz alan
-        ValidateLifetime = true,//oluþturulacak tokenýn süresi
-        ValidateIssuerSigningKey = true,//Üretilecek token degerinin uygulamaya ait bir özek key ile doðrulama
+builder.Services.AddSignalRServices();
 
-        ValidAudience=builder.Configuration["Token:Audince"],
-        ValidIssuer = builder.Configuration["Token:Issuer"],
-        IssuerSigningKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:Securitykey"]))
-    };
-});
 builder.Services.AddStorage<AzureStorage>();
 builder.Services.AddControllers(options =>
 {
@@ -42,19 +39,75 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.All;
+    logging.RequestHeaders.Add("sec-ch-ua");
+    logging.MediaTypeOptions.AddText("application/javascript");
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+
+});
+Logger log = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("log/log.txt")
+    .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("PostgreSQL"), "logs", needAutoCreateTable: true,
+    columnOptions: new Dictionary<string, ColumnWriterBase>
+    {
+        {"message",new RenderedMessageColumnWriter() },
+        {"message_template",new MessageTemplateColumnWriter() },
+        {"level",new LevelColumnWriter() },
+        {"time_span",new TimestampColumnWriter() },
+        {"exception",new ExceptionColumnWriter() },
+        {"log_event",new LogEventSerializedColumnWriter() },
+        {"user_name",new UsernameColumnWriter() }
+    })
+    .WriteTo.Seq(builder.Configuration["Seq:ServerUrl"])
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Host.UseSerilog(log);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer("Admin", options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateAudience = true,//OluÅŸturulacak token deÄŸerini kimlerin/hangi orjinlerin/hangi sitelerin kullanÄ±cÄ± belirttiÄŸimiz deÄŸer
+            ValidateIssuer = true,//OluÅŸturulacak Tokenin kimin DaÄŸÄ±ttÄ±ÄŸÄ±nÄ± ifade edeceÄŸimiz alan
+            ValidateLifetime = true,//oluÅŸturulacak tokenÄ±n sÃ¼resi
+            ValidateIssuerSigningKey = true,//Ãœretilecek token degerinin uygulamaya ait bir Ã¶zek key ile doÄŸrulama
+
+            ValidAudience = builder.Configuration["Token:Audience"],
+            ValidIssuer = builder.Configuration["Token:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:Securitykey"])),
+             LifetimeValidator=(notBefore,expires,securityToken,validationParameters)=>expires!=null ?expires>DateTime.UtcNow:false,
+             NameClaimType=ClaimTypes.Name
+             
+        };
+    });
+
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod());
-app.UseHttpsRedirection();
+app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
-app.UseAuthorization();
 app.UseStaticFiles();
-
-app.MapControllers();
+app.UseSerilogRequestLogging();
+app.ConfigureExceptionHandler<Program>(app.Services.GetRequiredService<ILogger<Program>>());
+app.UseHttpsRedirection();
+app.UseHttpLogging();
+app.UseAuthentication();
 app.UseAuthorization();
-
+app.Use(async(context, next) =>
+{
+    var user = context.User.Identity?.IsAuthenticated !=null || true ? context.User.Identity.Name : null;
+    LogContext.PushProperty("user_name",user);
+    await next();
+});
+app.MapControllers();
+app.MapHubs();
 app.Run();
